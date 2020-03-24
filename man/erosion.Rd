@@ -3,7 +3,7 @@
 \docType{data}
 \name{erosion}
 \alias{erosion}
-\title{Fake erosion data}
+\title{Simulated erosion data}
 \format{A data frame with 646 rows and 10 variables.
 \itemize{
   \item{ctylab}: {county name}
@@ -21,7 +21,8 @@
 erosion
 }
 \description{
-Fake data on soil erosion and other related variables for 64 South Dakota counties.
+Simulated data that mimics (the main features of) the real soil erosion data and
+other related variables for 64 South Dakota counties.
 }
 \seealso{
 \code{\link{Xaux}}

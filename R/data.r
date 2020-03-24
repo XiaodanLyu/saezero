@@ -18,9 +18,10 @@
 #' @source \url{https://lyux.shinyapps.io/viscover/}
 "Xaux"
 
-#' Fake erosion data
+#' Simulated erosion data
 #'
-#' Fake data on soil erosion and other related variables for 64 South Dakota counties.
+#' Simulated data that mimics (the main features of) the real soil erosion data and
+#' other related variables for 64 South Dakota counties.
 #'
 #' @format A data frame with 646 rows and 10 variables.
 #' \itemize{
