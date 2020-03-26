@@ -4,16 +4,16 @@
 \alias{mleLBH}
 \title{MLE model parameter estimator}
 \usage{
-mleLBH(f_pos, f_zero, area, data, link = "logit")
+mleLBH(f_pos, f_zero = f_pos, area, data, link = "logit")
 }
 \arguments{
 \item{f_pos}{an object of class \code{\link[stats]{formula}}:
-a symbolic description of the model to be fitted to the positive part.}
+a symbolic description of the fixed effect model to be fitted to the positive part.}
 
 \item{f_zero}{an object of class \code{\link[stats]{formula}}:
-a symbolic description of the model to be fitted to the binary part.}
+a symbolic description of the fixed effect model to be fitted to the binary part.}
 
-\item{area}{vector with area codes.}
+\item{area}{vector or name of the variable with area codes.}
 
 \item{data}{optional data frame containing the variables named in \code{f_pos}, \code{f_zero} and \code{area}.}
 
@@ -31,12 +31,22 @@ The function returns a list with the following objects:
   \item \code{refvar1}: estimated random effects variance in the positive part.
   \item \code{refvar0}: estimated random effects variance in the binary part.
   \item \code{refcor}: estimated correlation coefficient of the random effects between the two parts.
-  \item \code{loglike}: log-likelihood.
-  \item \code{residuals}: data frame with the raw residuals from the model fit in the positive part
-  (\code{p1}, cases with zero response are \code{NA}.) and the binary part (\code{p0}).
+  \item \code{loglik}: log-likelihood.
+  \item \code{residuals}: the conditional residuals from the model fit in the positive part
+  (\code{p1}, cases with nonpositive response are NA.).
 }
 }
 \description{
-Fits by ML method the unit level model of Lyu, Berg and Hofmann to a transformation of
-the specified response variable. The specified link function is used in the binary part.
+Fits by ML method the unit level model of Lyu, Berg and Hofmann.
+The specified link function is used in the binary part.
+}
+\details{
+The response variable in the formula \code{f_zero} is ignored.
+  \code{I(y>0)} will be used for the binary part where \code{y} is the
+  response variable in the formula \code{f_pos}.
+}
+\examples{
+  mleLBH(f_pos = RUSLE2~logR+logK+logS,
+         f_zero = ~logR+logS+crop2+crop3,
+         area = cty, data = erosion)
 }
