@@ -15,7 +15,11 @@
 #'   \item{crop3}: {indicator of spring wheat}
 #'   \item{cnt}: {number of crop pixels in soil map unit segment within county, from the CDL data}
 #' }
-#' @source \url{https://lyux.shinyapps.io/viscover/}
+#' @source \href{https://lyux.shinyapps.io/viscover/}{viscover}: a live Shiny tool
+#'   featured in the RStudion Shiny gallery,
+#'   which demonstrates how we integrate the USDA-NRCS Soil data and
+#'   the USDA-NASS Cropland data in order to
+#'   produce this dataset of auxiliary information for the cropland population in South Dakota.
 "Xaux"
 
 #' Simulated erosion data
