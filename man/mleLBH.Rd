@@ -24,16 +24,18 @@ The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \co
 The function returns a list with the following objects:
 \itemize{
   \item \code{fixed}: list with the estimated values of the fixed regression coefficient
-  in the positive part (\code{p1}) and in the binary part (\code{p0}).
+    in the positive part (\code{p1}) and in the binary part (\code{p0}).
   \item \code{random}: data frame with the predicted random effects in the positive part (\code{p1})
-  and the binary part (\code{p0}).
+    and the binary part (\code{p0}).
   \item \code{errorvar}: estimated model error variance in the positive part.
   \item \code{refvar1}: estimated random effects variance in the positive part.
   \item \code{refvar0}: estimated random effects variance in the binary part.
   \item \code{refcor}: estimated correlation coefficient of the random effects between the two parts.
   \item \code{loglik}: log-likelihood.
   \item \code{residuals}: the conditional residuals from the model fit in the positive part
-  (\code{p1}, cases with nonpositive response are NA.).
+    (\code{p1}, cases with nonpositive response are NA.).
+  \item \code{vcov}: list of the estimated variance-covariance matrixs of the linear coefficients
+    in the positive part (\code{p1}) and in the binary part (\code{p0}).
 }
 }
 \description{

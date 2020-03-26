@@ -15,16 +15,18 @@
 #' @return The function returns a list with the following objects:
 #' \itemize{
 #'   \item \code{fixed}: list with the estimated values of the fixed regression coefficient
-#'   in the positive part (\code{p1}) and in the binary part (\code{p0}).
+#'     in the positive part (\code{p1}) and in the binary part (\code{p0}).
 #'   \item \code{random}: data frame with the predicted random effects in the positive part (\code{p1})
-#'   and the binary part (\code{p0}).
+#'     and the binary part (\code{p0}).
 #'   \item \code{errorvar}: estimated model error variance in the positive part.
 #'   \item \code{refvar1}: estimated random effects variance in the positive part.
 #'   \item \code{refvar0}: estimated random effects variance in the binary part.
 #'   \item \code{refcor}: estimated correlation coefficient of the random effects between the two parts.
 #'   \item \code{loglik}: log-likelihood.
 #'   \item \code{residuals}: the conditional residuals from the model fit in the positive part
-#'   (\code{p1}, cases with nonpositive response are NA.).
+#'     (\code{p1}, cases with nonpositive response are NA.).
+#'   \item \code{vcov}: list of the estimated variance-covariance matrixs of the linear coefficients
+#'     in the positive part (\code{p1}) and in the binary part (\code{p0}).
 #' }
 #'
 #' @details The response variable in the formula \code{f_zero} is ignored.
@@ -40,7 +42,7 @@
 mleLBH <- function(f_pos, f_zero = f_pos, area, data, link = "logit"){
 
   result <- list(fixed = NA, random = NA, errorvar = NA, refvar1 = NA,
-                 refvar0 = NA, refcor = NA, loglik = NA, residuals = NA)
+                 refvar0 = NA, refcor = NA, loglik = NA, residuals = NA, vcov = NA)
 
   ## argument parsing and checking ####
 
@@ -92,7 +94,9 @@ mleLBH <- function(f_pos, f_zero = f_pos, area, data, link = "logit"){
   sige_ind <- sigma(fit_pos)
   uihat_ind <- unlist(lme4::ranef(fit_pos))
 
-  fit_zero <- lme4::glmer(deltas~Xs0-1+(1|area), family = binomial(link), nAGQ = 10)
+  suppressWarnings(
+    fit_zero <- lme4::glmer(deltas~Xs0-1+(1|area), family = binomial(link), nAGQ = 10)
+  )
   a_ind <- matrix(lme4::fixef(fit_zero), ncol = 1)
   sig2b_ind <- max(0.0098, unlist(lme4::VarCorr(fit_zero)))
   bihat_ind <- unlist(lme4::ranef(fit_zero))
@@ -104,7 +108,8 @@ mleLBH <- function(f_pos, f_zero = f_pos, area, data, link = "logit"){
   theta0 <- c(b_ind, sqrt(sig2u_ind), sige_ind,
               a_ind, sqrt(sig2b_ind), tan(pi/2*rho_ind))
 
-  res.theta <- optim(theta0, fn = loglik.neg, gr = loglik.neg.grad, method = "BFGS",
+  res.theta <- optim(theta0, fn = loglik.neg, gr = loglik.neg.grad,
+                     method = "BFGS", hessian = TRUE,
                      lys, Xs1, deltas, Xs0, area, link)
 
   if(res.theta$convergence!=0){
@@ -120,6 +125,9 @@ mleLBH <- function(f_pos, f_zero = f_pos, area, data, link = "logit"){
   result$refvar0 <- thetahat[p1+p2+3]^2
   result$refcor <- atan(thetahat[p1+p2+4])*2/pi
   result$loglik <- -1*res.theta$value
+  infmat <- solve(res.theta$hessian)
+  result$vcov <- list(p1 = infmat[1:p1, 1:p1],
+                      p0 = infmat[(p1+3):(p1+p2+2), (p1+3):(p1+p2+2)])
 
   ## EB predictor of random effects
   result$random <- ranefLBH(thetahat, lys, Xs1, deltas, Xs0, area, link)
