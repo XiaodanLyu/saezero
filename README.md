@@ -10,3 +10,5 @@ Run the following from an R console:
 if(!require("devtools")) install.packages("devtools")
 devtools::install_github("XiaodanLyu/saezero")
 ```
+
+Note: this R package is still under construction. :construction: Please use with caution. :smiling_imp:  
