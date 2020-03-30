@@ -104,7 +104,9 @@ mleLBH <- function(f_pos, f_zero = f_pos, area, data, link = "logit"){
   bihat_ind <- unlist(lme4::ranef(fit_zero))
 
   nti <- tapply(deltas, area, sum)
-  rho_ind <- cor(uihat_ind, bihat_ind[nti>0])
+  suppressWarnings(
+    rho_ind <- cor(uihat_ind, bihat_ind[nti>0])
+  )
   if(is.na(rho_ind)) rho_ind <- 0
   # 2. maximize log-likelihood over parameter space
   theta0 <- c(b_ind, sqrt(sig2u_ind), sige_ind,
