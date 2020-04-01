@@ -13,9 +13,9 @@
 #' @param fit a list from model fitting with components as returned by \code{\link{mleLBH}}.
 #'
 #' @return A data frame with the number of rows equal to the number of unique areas in \code{Xnonsample}:
-#' \describe{
-#'  \item{\code{area}}{area codes}
-#'  \item{\code{eb}}{EB estimator of area means}
+#' \itemize{
+#'  \item \code{area}: area codes
+#'  \item \code{eb}: EB estimator of area means
 #' }
 #'
 #' @examples
@@ -98,9 +98,10 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
   num.eb <- rowSums(apply(bmat, 2, num.emp)*(Gns%*%wmat))
   eb.peta <- num.eb/(Gns%*%den.eb)
 
-  ybar.r <- drop(t(Gns) %*% (eb.peta*cij*q))/sum(q)
+  nbaris <- tapply(q, area_oos, sum)
+  ybar.r <- drop(t(Gns) %*% (eb.peta*cij*q))/nbaris
   ybar.s <- drop(t(Gs[deltas==1,]) %*% expo(lys))/nis
-  eb <- drop(nis*ybar.s+sum(q)*ybar.r)/(nis+sum(q))
+  eb <- drop(nis*ybar.s+nbaris*ybar.r)/(nis+nbaris)
 
   return(data.frame(area = unique(area_oos), eb = eb))
 }

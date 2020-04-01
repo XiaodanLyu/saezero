@@ -20,9 +20,9 @@ Default value is \code{~1}.}
 }
 \value{
 A data frame with the number of rows equal to the number of unique areas in \code{Xnonsample}:
-\describe{
- \item{\code{area}}{area codes}
- \item{\code{eb}}{EB estimator of area means}
+\itemize{
+ \item \code{area}: area codes
+ \item \code{eb}: EB estimator of area means
 }
 }
 \description{
