@@ -21,12 +21,12 @@ a symbolic description of the area code to be fitted to both the positive part a
 }
 \value{
 An object of the class "2pdata" which is a list with the following components:
-\describe{
-  \item{\code{lys}}{response vector in log scale for the positive part}
-  \item{\code{Xs1}}{model matrix for the positive part}
-  \item{\code{deltas}}{binary response vector for the binary part}
-  \item{\code{Xs0}}{model matrix for the binary part}
-  \item{\code{area}}{vector with the area code}
+\itemize{
+  \item \code{lys}: response vector in log scale for the positive part
+  \item \code{Xs1}: model matrix for the positive part
+  \item \code{deltas}: binary response vector for the binary part
+  \item \code{Xs0}: model matrix for the binary part
+  \item \code{area}: vector with the area code
 }
 }
 \description{
