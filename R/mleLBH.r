@@ -8,7 +8,7 @@
 #' @param f_zero an object of class \code{\link[stats]{formula}}:
 #'   a symbolic description of the fixed effect model to be fitted to the binary part.
 #'   Default value is to using the same formula as the positive part (\code{f_pos}).
-#' @param area unquoted vector with area codes (same size as the response variable in \colde{formula}).
+#' @param area unquoted vector with area codes (same size as the response variable in \code{f_pos}).
 #' @param data optional data frame containing the variables named in \code{f_pos}, \code{f_zero} and \code{area}.
 #' @param link a specification for the link function used to model the binary part.
 #'   The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \code{log} and \code{cloglog}.

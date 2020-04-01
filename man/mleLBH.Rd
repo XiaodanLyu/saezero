@@ -14,7 +14,7 @@ a symbolic description of the fixed effect model to be fitted to the positive pa
 a symbolic description of the fixed effect model to be fitted to the binary part.
 Default value is to using the same formula as the positive part (\code{f_pos}).}
 
-\item{area}{unquoted vector with area codes (same size as the response variable in \colde{formula}).}
+\item{area}{unquoted vector with area codes (same size as the response variable in \code{f_pos}).}
 
 \item{data}{optional data frame containing the variables named in \code{f_pos}, \code{f_zero} and \code{area}.}
 
