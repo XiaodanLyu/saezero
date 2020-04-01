@@ -2,7 +2,7 @@
 % Please edit documentation in R/ebLBH.r
 \name{ebLBH}
 \alias{ebLBH}
-\title{EB estimators of area means with non-sample values of auxiliary variables}
+\title{EB estimator of area means and associated MSE estimator}
 \usage{
 ebLBH(Xnonsample, f_q = ~1, data_2p, fit)
 }
@@ -23,12 +23,14 @@ A data frame with the number of rows equal to the number of unique areas in \cod
 \itemize{
  \item \code{area}: area codes
  \item \code{eb}: EB estimator of area means
+ \item \code{mse}: one-step MSE estimator of area means
 }
 }
 \description{
-Fits by ML method the unit level model of Lyu, Berg and Hofmann and
-obtains numerical approximations of EB estimators of the specified area means,
-when the values of auxiliary variables for out-of-sample units are available.
+Obtains numerical approximations of EB estimators of area means
+under the unit level model of Lyu, Berg and Hofmann
+when the values of auxiliary variables for out-of-sample units and
+the model parameter estimates are available.
 }
 \examples{
   erosion_2p <- as.2pdata(f_pos = RUSLE2~logR+logK+logS,

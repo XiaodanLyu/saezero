@@ -1,8 +1,9 @@
-#' EB estimators of area means with non-sample values of auxiliary variables
+#' EB estimator of area means and associated MSE estimator
 #'
-#' Fits by ML method the unit level model of Lyu, Berg and Hofmann and
-#' obtains numerical approximations of EB estimators of the specified area means,
-#' when the values of auxiliary variables for out-of-sample units are available.
+#' Obtains numerical approximations of EB estimators of area means
+#' under the unit level model of Lyu, Berg and Hofmann
+#' when the values of auxiliary variables for out-of-sample units and
+#' the model parameter estimates are available.
 #'
 #' @param Xnonsample matrix or data frame containing covariates, the area code and
 #'   the variables named in \code{f_q} for the out-of-sample units.
@@ -16,6 +17,7 @@
 #' \itemize{
 #'  \item \code{area}: area codes
 #'  \item \code{eb}: EB estimator of area means
+#'  \item \code{mse}: one-step MSE estimator of area means
 #' }
 #'
 #' @examples
@@ -54,7 +56,7 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
   beta <- fixed$p1; alpha <- fixed$p0
   sig2le <- errorvar; sig2lu <- refvar1
   sig2lb <- refvar0; rho <- refcor
-  ## conditional distribution center and scale
+  ## conditional distributions ####
   D <- length(nis)
   nti <- tapply(deltas, area, sum)
   rt <- rep(0, length(area))
@@ -71,8 +73,6 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
   b_m <- rho*sqrt(sig2lu*sig2lb)*rbar/(sig2lu+sig2le/nti)
   b_v <- (1-rho^2)/(1-(1-gamma)*rho^2)*sig2lb
 
-  cij <- exp(Xs1_oos%*%beta + Gns%*%(mu_u+sig2_u/2) + sig2le/2)
-
   ## Gauss-Hermite method
   ghwts <- do.call("rbind", lapply(1:D, function(i){
     wts <- statmod::gauss.quad.prob(20, dist = "normal", mu = b_m[i], sigma = sqrt(b_v[i]))
@@ -87,6 +87,9 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
     thres <- apply(Gs*pq, 2, function(x) prod(x[x>0]))
     thres
   }
+  den.eb <- rowSums(apply(bmat, 2, thres.gen)*wmat)
+
+  ## EB estimator ####
   num.emp <- function(b){
     thres <- thres.gen(b)
     mu_p <- Xs0_oos%*%alpha + Gns%*%b
@@ -94,14 +97,33 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
     num <- Gns%*%(thres*(eta^b))*pb
     drop(num)
   }
-  den.eb <- rowSums(apply(bmat, 2, thres.gen)*wmat)
   num.eb <- rowSums(apply(bmat, 2, num.emp)*(Gns%*%wmat))
   eb.peta <- num.eb/(Gns%*%den.eb)
-
+  cij <- exp(Xs1_oos%*%beta + Gns%*%(mu_u+sig2_u/2) + sig2le/2)
   nbaris <- tapply(q, area_oos, sum)
   ybar.r <- drop(t(Gns) %*% (eb.peta*cij*q))/nbaris
   ybar.s <- drop(t(Gs[deltas==1,]) %*% expo(lys))/nis
   eb <- drop(nis*ybar.s+nbaris*ybar.r)/(nis+nbaris)
 
-  return(data.frame(area = unique(area_oos), eb = eb))
+  ## MSE estimator ####
+  num.y2eb <- function(b){
+    mu_p <- Xs0_oos%*%alpha + Gns%*%b
+    pb <- make.link(link)$linkinv(mu_p)
+    V <- pb*cij*q
+    Wij <- function(i) {
+      id <- which(area_oos==unique(area_oos)[i])
+      W <- V[id,] %*% t(V[id,]) * exp(sig2_u[i]) * eta[i]^(2*b[i])
+      diag(W) <- diag(W)*(1 + (exp(sig2le)/pb[id]-1)/q[id])
+      diag(W)[q[id]==0] <- 0
+      sum(W)
+    }
+    Wi <- sapply(1:D, Wij)
+    thres.gen(b)*Wi
+  }
+  num.vareb <- rowSums(apply(bmat, 2, num.y2eb)*wmat)
+  ybar2.r <- (1/nbaris)^2*num.vareb/den.eb
+  a <- nbaris/(nbaris+nis)
+  mse <- a^2*(ybar2.r-(ybar.r)^2)
+
+  return(data.frame(area = unique(area_oos), eb = eb, mse = mse))
 }
