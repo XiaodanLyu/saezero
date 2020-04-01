@@ -3,17 +3,10 @@
 #' Fits by ML method the unit level model of Lyu, Berg and Hofmann.
 #' The specified link function is used in the binary part.
 #'
-#' @param f_pos an object of class \code{\link[stats]{formula}}:
-#'   a symbolic description of the fixed effect model to be fitted to the positive part.
-#' @param f_zero an object of class \code{\link[stats]{formula}}:
-#'   a symbolic description of the fixed effect model to be fitted to the binary part.
-#'   Default value is to using the same formula as the positive part (\code{f_pos}).
-#' @param area unquoted vector with area codes (same size as the response variable in \code{f_pos}).
-#' @param data optional data frame containing the variables named in \code{f_pos}, \code{f_zero} and \code{area}.
+#' @param data_2p a two-part data object returned by \code{\link{as.2pdata}}.
 #' @param link a specification for the link function used to model the binary part.
 #'   The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \code{log} and \code{cloglog}.
 #'   Default value is "logit".
-#'
 #' @return The function returns a list with the following objects:
 #' \itemize{
 #'   \item \code{fixed}: list with the estimated values of the fixed regression coefficient
@@ -31,61 +24,24 @@
 #'     in the positive part (\code{p1}) and in the binary part (\code{p0}).
 #' }
 #'
-#' @details The response variable in the formula \code{f_zero} is ignored.
-#'   \code{I(y>0)} will be used for the binary part where \code{y} is the
-#'   response variable in the formula \code{f_pos}.
-#'
 #' @examples
-#'   mleLBH(f_pos = RUSLE2~logR+logK+logS,
-#'          f_zero = ~logR+logS+crop2+crop3,
-#'          area = cty, data = erosion)
+#'   erosion_2p <- as.2pdata(f_pos = RUSLE2~logR+logK+logS,
+#'                           f_zero = ~logR+logS+crop2+crop3,
+#'                           f_area = ~cty, data = erosion)
+#'   fit <- mleLBH(erosion_2p)
 #' @import stats
 #' @export
-mleLBH <- function(f_pos, f_zero = f_pos, area, data, link = "logit"){
+mleLBH <- function(data_2p, link = "logit"){
 
   result <- list(fixed = NA, random = NA, errorvar = NA, refvar1 = NA,
                  refvar0 = NA, refcor = NA, loglik = NA, residuals = NA, vcov = NA)
+  attr(result, "link") <- link
 
   ## argument parsing and checking ####
-
   if (!(link %in% c("logit", "probit", "cauchit", "log", "cloglog")))
     stop("Argument link must be \"logit\", \"probit\", \"cauchit\", \"log\" or \"cloglog\".")
 
-  if (!missing(data)){
-    data <- as.data.frame(data)
-    fposdata <- model.frame(f_pos, na.action = na.pass, data)
-    fzerodata <- model.frame(f_zero, na.action = na.pass, data)
-    area <- data[, deparse(substitute(area))]
-  } else{
-    fposdata <- model.frame(f_pos, na.action = na.pass)
-    fzerodata <- model.frame(f_zero, na.action = na.pass)
-  }
-
-  if (!is.vector(area)) area <- as.vector(area)
-
-  if (nrow(fposdata)!=length(area))
-    stop("Arguments f_pos [nrows=",nrow(fposdata),"] and area [nrows=",length(area),"] must be the same length.\n")
-  if (nrow(fzerodata)!=length(area))
-    stop("Arguments f_zero [nrows=",nrow(fzerodata),"] and area [nrows=",length(area),"] must be the same length.\n")
-
-  # Delete rows with NA values
-  rowNA1 <- which(apply(fposdata, 1, function(x) any(is.na(x))))
-  rowNA0 <- which(apply(fzerodata, 1, function(x) any(is.na(x))))
-  omitted <- unique(c(rowNA1, rowNA0, which(is.na(area))))
-  if (length(omitted)) {
-    area <- area[-omitted]
-    fposdata <- fposdata[-omitted,]
-    fzerodata <- fzerodata[-omitted,]
-  }
-
-  if(any(fposdata[,1]<0)) stop("Responses must be nonnegative.")
-
-  deltas <- ifelse(fposdata[,1]>0, 1, 0)
-  Xs0  <- model.matrix(f_zero, fzerodata)
-
-  fposdata <- fposdata[which(deltas==1),]
-  lys <- log(fposdata[,1])
-  Xs1  <- model.matrix(f_pos, fposdata)
+  attach(data_2p, warn.conflicts = FALSE)
 
   ## model fit ####
   # 1. fit independence model to get appropriate initial values

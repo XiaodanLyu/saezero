@@ -4,19 +4,10 @@
 \alias{mleLBH}
 \title{MLE model parameter estimator}
 \usage{
-mleLBH(f_pos, f_zero = f_pos, area, data, link = "logit")
+mleLBH(data_2p, link = "logit")
 }
 \arguments{
-\item{f_pos}{an object of class \code{\link[stats]{formula}}:
-a symbolic description of the fixed effect model to be fitted to the positive part.}
-
-\item{f_zero}{an object of class \code{\link[stats]{formula}}:
-a symbolic description of the fixed effect model to be fitted to the binary part.
-Default value is to using the same formula as the positive part (\code{f_pos}).}
-
-\item{area}{unquoted vector with area codes (same size as the response variable in \code{f_pos}).}
-
-\item{data}{optional data frame containing the variables named in \code{f_pos}, \code{f_zero} and \code{area}.}
+\item{data_2p}{a two-part data object returned by \code{\link{as.2pdata}}.}
 
 \item{link}{a specification for the link function used to model the binary part.
 The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \code{log} and \code{cloglog}.
@@ -44,13 +35,9 @@ The function returns a list with the following objects:
 Fits by ML method the unit level model of Lyu, Berg and Hofmann.
 The specified link function is used in the binary part.
 }
-\details{
-The response variable in the formula \code{f_zero} is ignored.
-  \code{I(y>0)} will be used for the binary part where \code{y} is the
-  response variable in the formula \code{f_pos}.
-}
 \examples{
-  mleLBH(f_pos = RUSLE2~logR+logK+logS,
-         f_zero = ~logR+logS+crop2+crop3,
-         area = cty, data = erosion)
+  erosion_2p <- as.2pdata(f_pos = RUSLE2~logR+logK+logS,
+                          f_zero = ~logR+logS+crop2+crop3,
+                          f_area = ~cty, data = erosion)
+  fit <- mleLBH(erosion_2p)
 }
