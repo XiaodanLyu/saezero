@@ -73,6 +73,7 @@ as.2pdata <- function(f_pos, f_zero = f_pos, f_area, data){
 
   result <- list(lys = lys, Xs1 = Xs1, deltas = deltas, Xs0 = Xs0, area = area)
   attr(result, "f_pos") <- f_pos
+  if(length(f_zero)==3) f_zero <- f_zero[-2]
   attr(result, "f_zero") <- f_zero
   attr(result, "f_area") <- f_area
 
