@@ -42,3 +42,9 @@
 #' }
 #' @seealso \code{\link{Xaux}}
 "erosion"
+
+#' South Dakota map data
+#'
+#' South Dakota county map coordinates in longitude and latitude with FIPS.
+#'
+"map_sd"
