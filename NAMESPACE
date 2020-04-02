@@ -3,4 +3,5 @@
 export(as.2pdata)
 export(ebLBH)
 export(mleLBH)
+export(simLBH)
 import(stats)
