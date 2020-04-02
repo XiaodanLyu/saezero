@@ -11,7 +11,9 @@
 #'   a symbolic description of the number of out-of-sample units with the same covariates.
 #'   Default value is \code{~1}.
 #' @param data_2p a two-part data object returned by \code{\link{as.2pdata}}.
-#' @param fit a list from model fitting with components as returned by \code{\link{mleLBH}}.
+#' @param fit a list of model parameter
+#'  estimates of at least fixed effects coefficients and variance components
+#'  (named as the return value of \code{\link{mleLBH}}).
 #'
 #' @return A data frame with the number of rows equal to the number of unique areas in \code{Xnonsample}:
 #' \itemize{
@@ -40,7 +42,6 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
   fs <- attributes(data_2p)
   area_oos <- Xnonsample[, all.vars(fs$f_area)]
   Xs1_oos <- model.matrix(fs$f_pos[-2], data = Xnonsample)
-  if(length(fs$f_zero)==3) fs$f_zero <- fs$f_zero[-2]
   Xs0_oos <- model.matrix(fs$f_zero, data = Xnonsample)
   link <- attributes(fit)$link
 
@@ -110,7 +111,7 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
     mu_p <- Xs0_oos%*%alpha + Gns%*%b
     pb <- make.link(link)$linkinv(mu_p)
     V <- pb*cij*q
-    Wij <- function(i) {
+    Wij <- function(i){
       id <- which(area_oos==unique(area_oos)[i])
       W <- V[id,] %*% t(V[id,]) * exp(sig2_u[i]) * eta[i]^(2*b[i])
       diag(W) <- diag(W)*(1 + (exp(sig2le)/pb[id]-1)/q[id])

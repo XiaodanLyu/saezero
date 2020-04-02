@@ -16,7 +16,9 @@ Default value is \code{~1}.}
 
 \item{data_2p}{a two-part data object returned by \code{\link{as.2pdata}}.}
 
-\item{fit}{a list from model fitting with components as returned by \code{\link{mleLBH}}.}
+\item{fit}{a list of model parameter
+estimates of at least fixed effects coefficients and variance components
+(named as the return value of \code{\link{mleLBH}}).}
 }
 \value{
 A data frame with the number of rows equal to the number of unique areas in \code{Xnonsample}:
