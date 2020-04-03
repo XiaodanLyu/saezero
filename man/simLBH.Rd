@@ -2,18 +2,44 @@
 % Please edit documentation in R/simLBH.r
 \name{simLBH}
 \alias{simLBH}
-\title{Simulate unit responses under the unit level model of Lyu, Berg and Hofmann}
+\title{Simulate unit responses}
 \usage{
 simLBH(fit, Xs, f_pos, f_zero = f_pos, f_area, link = "logit")
 }
+\arguments{
+\item{fit}{a list of model parameter
+estimates containing at least fixed effects coefficients and variance components
+(named as the return value of \code{\link{mleLBH}}).}
+
+\item{Xs}{covariates matrix or data frame containing the variables named in
+\code{f_pos}, \code{f_zero} and \code{f_area}.}
+
+\item{f_pos}{an object of class \code{\link[stats]{formula}}:
+a symbolic description of the fixed effect model to be fitted to the positive part.}
+
+\item{f_zero}{an object of class \code{\link[stats]{formula}}:
+a symbolic description of the fixed effect model to be fitted to the binary part.
+Default value is to using the same formula as the positive part (\code{f_pos}).}
+
+\item{f_area}{an object of class \code{\link[stats]{formula}}:
+a symbolic description of the area code to be fitted to both the positive part and the negative part.}
+
+\item{link}{a specification for the link function used to model the binary part.
+The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \code{log} and \code{cloglog}.
+Default value is "logit".}
+}
+\value{
+response vector
+}
 \description{
-Simulate responses given the model parameter and covariates.
+Simulate responses given the model parameter and covariates
+under the unit level model of Lyu, Berg and Hofmann.
 }
 \examples{
   erosion_2p <- as.2pdata(f_pos = RUSLE2~logR+logK+logS,
                           f_zero = ~logR+logS+crop2+crop3,
                           f_area = ~cty, data = erosion)
   fit <- mleLBH(erosion_2p)
-  responses <- simLBH(fit, Xaux, f_pos = RUSLE2~logR+logK+logS,
+  responses <- simLBH(fit, Xaux, f_pos = ~logR+logK+logS,
                       f_zero = ~logR+logS+crop2+crop3, f_area = ~cty)
 }

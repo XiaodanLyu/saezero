@@ -28,6 +28,6 @@
 Xaux
 }
 \description{
-Values of auxiliary variables for units within 64 domains of data set \code{\link{erosion}}.
+Values of auxiliary variables for full population units within 64 domains of data set \code{\link{erosion}}.
 }
 \keyword{datasets}

@@ -1,6 +1,6 @@
 #' Values of auxiliary variables for 64 domains
 #'
-#' Values of auxiliary variables for units within 64 domains of data set \code{\link{erosion}}.
+#' Values of auxiliary variables for full population units within 64 domains of data set \code{\link{erosion}}.
 #'
 #' @format A data frame with 16,580 rows and 10 variables.
 #' \itemize{
