@@ -4,40 +4,52 @@
 \alias{ebLBH}
 \title{EB estimator of area means and associated MSE estimator}
 \usage{
-ebLBH(Xnonsample, f_q = ~1, data_2p, fit)
+ebLBH(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE)
 }
 \arguments{
-\item{Xnonsample}{matrix or data frame containing covariates, the area code and
-the variables named in \code{f_q} for the out-of-sample units.}
+\item{Xaux}{matrix or data frame containing covariates, the area code and
+the variables named in \code{f_q} for population units.}
 
 \item{f_q}{an object of class \code{\link[stats]{formula}}:
-a symbolic description of the number of out-of-sample units with the same covariates.
+a symbolic description of the number of population units with the same covariates.
 Default value is \code{~1}.}
 
 \item{data_2p}{a two-part data object returned by \code{\link{as.2pdata}}.}
 
 \item{fit}{a list of model parameter
-estimates of at least fixed effects coefficients and variance components
+estimates containing at least fixed effects coefficients and variance components
 (named as the return value of \code{\link{mleLBH}}).}
+
+\item{fullpop}{a boolean variable indicating whether \code{Xaux} contains covariates information
+for the full population (\code{TRUE}) or just the out-of-sample units (\code{FALSE}).
+Default value is \code{FALSE}. The details of this indicator are given under Details.}
 }
 \value{
-A data frame with the number of rows equal to the number of unique areas in \code{Xnonsample}:
+A data frame with the number of rows equal to the number of unique areas in \code{Xaux}:
 \itemize{
  \item \code{area}: area codes
  \item \code{eb}: EB estimator of area means
- \item \code{mse}: one-step MSE estimator of area means
+ \item \code{mse}: the One-step MSE estimator
 }
 }
 \description{
 Obtains numerical approximations of EB estimators of area means
 under the unit level model of Lyu, Berg and Hofmann
-when the values of auxiliary variables for out-of-sample units and
+when the values of auxiliary variables for population units and
 the model parameter estimates are available.
+}
+\details{
+When \code{Xaux} contains only the covariates of the out-of-sample units (\code{fullpop = FALSE}),
+  observed response is used for the sampled units when calculating the EB estimator.
+  When \code{Xaux} contains the covariates of the full population (\code{fullpop = TRUE}),
+  unit-level EB prediction is used for the sampled units. This is
+  reasonable when the sampling fraction is extremely small in each area
+  (e.g., \href{https://doi.org/10.1080/01621459.1988.10478561}{Battese, Harter and Fuller (1988)}).
 }
 \examples{
   erosion_2p <- as.2pdata(f_pos = RUSLE2~logR+logK+logS,
                           f_zero = ~logR+logS+crop2+crop3,
                           f_area = ~cty, data = erosion)
   fit <- mleLBH(erosion_2p)
-  predictions <- ebLBH(Xaux, f_q = ~cnt, erosion_2p, fit)
+  predictions <- ebLBH(Xaux, f_q = ~cnt, erosion_2p, fit, fullpop = TRUE)
 }

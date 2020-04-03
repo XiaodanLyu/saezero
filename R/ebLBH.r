@@ -2,24 +2,35 @@
 #'
 #' Obtains numerical approximations of EB estimators of area means
 #' under the unit level model of Lyu, Berg and Hofmann
-#' when the values of auxiliary variables for out-of-sample units and
+#' when the values of auxiliary variables for population units and
 #' the model parameter estimates are available.
 #'
-#' @param Xnonsample matrix or data frame containing covariates, the area code and
-#'   the variables named in \code{f_q} for the out-of-sample units.
+#' @param Xaux matrix or data frame containing covariates, the area code and
+#'   the variables named in \code{f_q} for population units.
 #' @param f_q an object of class \code{\link[stats]{formula}}:
-#'   a symbolic description of the number of out-of-sample units with the same covariates.
+#'   a symbolic description of the number of population units with the same covariates.
 #'   Default value is \code{~1}.
 #' @param data_2p a two-part data object returned by \code{\link{as.2pdata}}.
 #' @param fit a list of model parameter
-#'  estimates of at least fixed effects coefficients and variance components
-#'  (named as the return value of \code{\link{mleLBH}}).
+#'   estimates containing at least fixed effects coefficients and variance components
+#'   (named as the return value of \code{\link{mleLBH}}).
+#' @param fullpop a boolean variable indicating whether \code{Xaux} contains covariates information
+#'   for the full population (\code{TRUE}) or just the out-of-sample units (\code{FALSE}).
+#'   Default value is \code{FALSE}. The details of this indicator are given under Details.
 #'
-#' @return A data frame with the number of rows equal to the number of unique areas in \code{Xnonsample}:
+#' @details
+#'   When \code{Xaux} contains only the covariates of the out-of-sample units (\code{fullpop = FALSE}),
+#'   observed response is used for the sampled units when calculating the EB estimator.
+#'   When \code{Xaux} contains the covariates of the full population (\code{fullpop = TRUE}),
+#'   unit-level EB prediction is used for the sampled units. This is
+#'   reasonable when the sampling fraction is extremely small in each area
+#'   (e.g., \href{https://doi.org/10.1080/01621459.1988.10478561}{Battese, Harter and Fuller (1988)}).
+#'
+#' @return A data frame with the number of rows equal to the number of unique areas in \code{Xaux}:
 #' \itemize{
 #'  \item \code{area}: area codes
 #'  \item \code{eb}: EB estimator of area means
-#'  \item \code{mse}: one-step MSE estimator of area means
+#'  \item \code{mse}: the One-step MSE estimator
 #' }
 #'
 #' @examples
@@ -27,22 +38,22 @@
 #'                           f_zero = ~logR+logS+crop2+crop3,
 #'                           f_area = ~cty, data = erosion)
 #'   fit <- mleLBH(erosion_2p)
-#'   predictions <- ebLBH(Xaux, f_q = ~cnt, erosion_2p, fit)
+#'   predictions <- ebLBH(Xaux, f_q = ~cnt, erosion_2p, fit, fullpop = TRUE)
 #' @export
 #'
-ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
+ebLBH <- function(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE){
 
   ## argument parsing and checking ####
-  Xnonsample <- data.frame(Xnonsample)
+  Xaux <- data.frame(Xaux)
   if (length(all.vars(f_q))) {
-    q <- Xnonsample[, all.vars(f_q)]
+    q <- Xaux[, all.vars(f_q)]
   } else {
-    q <- rep(1, nrow(Xnonsample))
+    q <- rep(1, nrow(Xaux))
   }
   fs <- attributes(data_2p)
-  area_oos <- Xnonsample[, all.vars(fs$f_area)]
-  Xs1_oos <- model.matrix(fs$f_pos[-2], data = Xnonsample)
-  Xs0_oos <- model.matrix(fs$f_zero, data = Xnonsample)
+  area_oos <- Xaux[, all.vars(fs$f_area)]
+  Xs1_oos <- model.matrix(fs$f_pos[-2], data = Xaux)
+  Xs0_oos <- model.matrix(fs$f_zero, data = Xaux)
   link <- attributes(fit)$link
 
   attach(data_2p, warn.conflicts = FALSE)
@@ -52,6 +63,12 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
   mis <- tapply(area_oos, area_oos, length)
   Gs <- Gmat(nis)
   Gns <- Gmat(mis)
+
+  if (fullpop){
+    fis <- 0
+  } else{
+    fis <- nis
+  }
 
   ## parameter estimates
   beta <- fixed$p1; alpha <- fixed$p0
@@ -104,7 +121,7 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
   nbaris <- tapply(q, area_oos, sum)
   ybar.r <- drop(t(Gns) %*% (eb.peta*cij*q))/nbaris
   ybar.s <- drop(t(Gs[deltas==1,]) %*% expo(lys))/nis
-  eb <- drop(nis*ybar.s+nbaris*ybar.r)/(nis+nbaris)
+  eb <- drop(fis*ybar.s+nbaris*ybar.r)/(fis+nbaris)
 
   ## MSE estimator ####
   num.y2eb <- function(b){
@@ -123,7 +140,7 @@ ebLBH <- function(Xnonsample, f_q = ~1, data_2p, fit){
   }
   num.vareb <- rowSums(apply(bmat, 2, num.y2eb)*wmat)
   ybar2.r <- (1/nbaris)^2*num.vareb/den.eb
-  a <- nbaris/(nbaris+nis)
+  a <- nbaris/(nbaris+fis)
   mse <- a^2*(ybar2.r-(ybar.r)^2)
 
   return(data.frame(area = unique(area_oos), eb = eb, mse = mse))
