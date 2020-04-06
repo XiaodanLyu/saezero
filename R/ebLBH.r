@@ -143,5 +143,7 @@ ebLBH <- function(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE){
   a <- nbaris/(nbaris+fis)
   mse <- a^2*(ybar2.r-(ybar.r)^2)
 
+  detach(data_2p)
+  detach(fit)
   return(data.frame(area = unique(area_oos), eb = eb, mse = mse))
 }

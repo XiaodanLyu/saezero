@@ -102,6 +102,7 @@ mleLBH <- function(data_2p, link = "logit"){
   result$residuals <- rep(NA, length(area))
   result$residuals[deltas==1] <- lys - lyshat
 
+  detach(data_2p)
   return(result)
 }
 
