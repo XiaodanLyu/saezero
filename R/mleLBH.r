@@ -22,6 +22,7 @@
 #'     (\code{p1}, cases with nonpositive response are NA.).
 #'   \item \code{vcov}: list of the estimated variance-covariance matrixs of the linear coefficients
 #'     in the positive part (\code{p1}) and in the binary part (\code{p0}).
+#'   \item \code{fit0}: model parameter estimator under independence assumption.
 #' }
 #'
 #' @examples
@@ -34,7 +35,8 @@
 mleLBH <- function(data_2p, link = "logit"){
 
   result <- list(fixed = NA, random = NA, errorvar = NA, refvar1 = NA,
-                 refvar0 = NA, refcor = NA, loglik = NA, residuals = NA, vcov = NA)
+                 refvar0 = NA, refcor = NA, loglik = NA, residuals = NA,
+                 vcov = NA, fit0 = NA)
   attr(result, "link") <- link
 
   ## argument parsing and checking ####
@@ -56,7 +58,7 @@ mleLBH <- function(data_2p, link = "logit"){
     fit_zero <- lme4::glmer(deltas~Xs0-1+(1|area), family = binomial(link), nAGQ = 10)
   )
   a_ind <- matrix(lme4::fixef(fit_zero), ncol = 1)
-  sig2b_ind <- max(0.0098, unlist(lme4::VarCorr(fit_zero)))
+  sig2b_ind <- unlist(lme4::VarCorr(fit_zero))
   bihat_ind <- unlist(lme4::ranef(fit_zero))
 
   nti <- tapply(deltas, area, sum)
@@ -66,7 +68,11 @@ mleLBH <- function(data_2p, link = "logit"){
   if(is.na(rho_ind)) rho_ind <- 0
   # 2. maximize log-likelihood over parameter space
   theta0 <- c(b_ind, sqrt(sig2u_ind), sige_ind,
-              a_ind, sqrt(sig2b_ind), tan(pi/2*rho_ind))
+              a_ind, sqrt(max(0.0098, sig2b_ind)), tan(pi/2*rho_ind))
+
+  result$fit0 <- list(fixed = list(p1 = b_ind, p0 = a_ind),
+                      errorvar = sige_ind^2, refvar1 = sig2u_ind,
+                      refvar0 = sig2b_ind, refcor = 0)
 
   res.theta <- optim(theta0, fn = loglik.neg, gr = loglik.neg.grad,
                      method = "BFGS", hessian = TRUE,
