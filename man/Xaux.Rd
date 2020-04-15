@@ -19,7 +19,7 @@
 }}
 \source{
 \href{https://lyux.shinyapps.io/viscover/}{viscover}: a live Shiny tool
-  featured in the RStudion Shiny gallery,
+  featured in the RStudio Shiny gallery,
   which demonstrates how we integrate the USDA-NRCS Soil data and
   the USDA-NASS Cropland data in order to
   produce this dataset of auxiliary information for the cropland population in South Dakota.

@@ -1,7 +1,7 @@
 #' Converts a data frame to a list made for fitting LBH model
 #'
 #' The default method deals with the \code{NA} values in the input data and
-#' transform the data into a format that fits the framework of the unit level model of Lyu, Berg and Hofmann.
+#' transforms the data into a format that fits the framework of the unit level model of Lyu, Berg and Hofmann.
 #'
 #' @param f_pos an object of class \code{\link[stats]{formula}}:
 #'   a symbolic description of the fixed effect model to be fitted to the positive part.
@@ -10,7 +10,7 @@
 #'   Default value is to using the same formula as the positive part (\code{f_pos}).
 #' @param f_area an object of class \code{\link[stats]{formula}}:
 #'   a symbolic description of the area code to be fitted to both the positive part and the negative part.
-#' @param data optional data frame containing the variables named in \code{f_pos}, \code{f_zero} and \code{f_area}.
+#' @param data data frame containing the variables named in \code{f_pos}, \code{f_zero} and \code{f_area}.
 #'
 #' @return An object of the class "2pdata" which is a list with the following components:
 #' \itemize{
