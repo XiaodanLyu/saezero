@@ -17,7 +17,8 @@ Default value is to using the same formula as the positive part (\code{f_pos}).}
 \item{f_area}{an object of class \code{\link[stats]{formula}}:
 a symbolic description of the area code to be fitted to both the positive part and the negative part.}
 
-\item{data}{data frame containing the variables named in \code{f_pos}, \code{f_zero} and \code{f_area}.}
+\item{data}{sample data containing the variables named in \code{f_pos}, \code{f_zero} and \code{f_area}.
+Any sampling units containing missing entries in the model data frame are removed.}
 }
 \value{
 An object of the class "2pdata" which is a list with the following components:
@@ -30,8 +31,7 @@ An object of the class "2pdata" which is a list with the following components:
 }
 }
 \description{
-The default method deals with the \code{NA} values in the input data and
-transforms the data into a format that fits the framework of the unit level model of Lyu, Berg and Hofmann.
+The default method transforms the data into a format that fits the framework of the unit level model of Lyu, Berg and Hofmann.
 }
 \details{
 The response variable in the formula \code{f_zero} is ignored.
