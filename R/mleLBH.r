@@ -54,9 +54,10 @@ mleLBH <- function(data_2p, link = "logit"){
   sige_ind <- sigma(fit_pos)
   uihat_ind <- unlist(lme4::ranef(fit_pos))
 
-  suppressWarnings(
+  suppressMessages(suppressWarnings(
     fit_zero <- lme4::glmer(deltas~Xs0-1+(1|area), family = binomial(link), nAGQ = 10)
-  )
+  ))
+
   a_ind <- matrix(lme4::fixef(fit_zero), ncol = 1)
   sig2b_ind <- unlist(lme4::VarCorr(fit_zero))
   bihat_ind <- unlist(lme4::ranef(fit_zero))
