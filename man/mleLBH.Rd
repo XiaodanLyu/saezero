@@ -25,8 +25,8 @@ The function returns a list with the following objects:
   \item \code{refvar0}: estimated random effects variance in the binary part.
   \item \code{refcor}: estimated correlation coefficient of the random effects between the two parts.
   \item \code{loglik}: log-likelihood.
-  \item \code{residuals}: the conditional residuals from the model fit in the positive part
-    (\code{p1}, cases with nonpositive response are NA.).
+  \item \code{residuals}: the marginal (\code{mar}) and conditional (\code{con}) residuals
+    from the model fit in the positive part (\code{p1}, cases with nonpositive response are NA.).
   \item \code{vcov}: list of the estimated variance-covariance matrices of the linear coefficients
     in the positive part (\code{p1}) and in the binary part (\code{p0}).
   \item \code{fit0}: model parameter estimator under independence assumption.

@@ -18,8 +18,8 @@
 #'   \item \code{refvar0}: estimated random effects variance in the binary part.
 #'   \item \code{refcor}: estimated correlation coefficient of the random effects between the two parts.
 #'   \item \code{loglik}: log-likelihood.
-#'   \item \code{residuals}: the conditional residuals from the model fit in the positive part
-#'     (\code{p1}, cases with nonpositive response are NA.).
+#'   \item \code{residuals}: the marginal (\code{mar}) and conditional (\code{con}) residuals
+#'     from the model fit in the positive part (\code{p1}, cases with nonpositive response are NA.).
 #'   \item \code{vcov}: list of the estimated variance-covariance matrices of the linear coefficients
 #'     in the positive part (\code{p1}) and in the binary part (\code{p0}).
 #'   \item \code{fit0}: model parameter estimator under independence assumption.
@@ -99,9 +99,12 @@ mleLBH <- function(data_2p, link = "logit"){
   ## EB predictor of random effects
   result$random <- ranefLBH(thetahat, lys, Xs1, deltas, Xs0, area, link)
   ## fitted values
-  lyshat <- Xs1 %*% (result$fixed$p1) + Gmat(nti) %*% (result$random$p1[nti>0])
-  result$residuals <- rep(NA, length(area))
-  result$residuals[deltas==1] <- lys - lyshat
+  lyshat.mar <- Xs1 %*% (result$fixed$p1)
+  lyshat.con <- lyshat.mar + Gmat(nti) %*% (result$random$p1[nti>0])
+  result$residuals <- data.frame(mar = rep(NA, length(area)),
+                                 con = rep(NA, length(area)))
+  result$residuals[deltas==1, "mar"] <- lys - lyshat.mar
+  result$residuals[deltas==1, "con"] <- lys - lyshat.con
 
   detach(data_2p)
   return(result)
