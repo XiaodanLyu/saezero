@@ -24,7 +24,8 @@ The function returns a list with the following objects:
   \item \code{refvar1}: estimated random effects variance in the positive part.
   \item \code{refvar0}: estimated random effects variance in the binary part.
   \item \code{refcor}: estimated correlation coefficient of the random effects between the two parts.
-  \item \code{loglik}: log-likelihood.
+  \item \code{loglik}: log-likelihood accomodating a general transformation family and \code{lambda}
+    in the positive part as specified in \code{\link{as.2pdata}}.
   \item \code{residuals}: the marginal (\code{mar}) and conditional (\code{con}) residuals
     from the model fit in the positive part (\code{p1}, cases with nonpositive response are NA.).
   \item \code{vcov}: list of the estimated variance-covariance matrices of the linear coefficients
@@ -41,4 +42,7 @@ The specified link function is used in the binary part.
                           f_zero = ~logR+logS+crop2+crop3,
                           f_area = ~cty, data = erosion)
   fit <- mleLBH(erosion_2p)
+}
+\seealso{
+\code{\link{as.2pdata}}
 }

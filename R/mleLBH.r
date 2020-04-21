@@ -17,7 +17,8 @@
 #'   \item \code{refvar1}: estimated random effects variance in the positive part.
 #'   \item \code{refvar0}: estimated random effects variance in the binary part.
 #'   \item \code{refcor}: estimated correlation coefficient of the random effects between the two parts.
-#'   \item \code{loglik}: log-likelihood.
+#'   \item \code{loglik}: log-likelihood accomodating a general transformation family and \code{lambda}
+#'     in the positive part as specified in \code{\link{as.2pdata}}.
 #'   \item \code{residuals}: the marginal (\code{mar}) and conditional (\code{con}) residuals
 #'     from the model fit in the positive part (\code{p1}, cases with nonpositive response are NA.).
 #'   \item \code{vcov}: list of the estimated variance-covariance matrices of the linear coefficients
@@ -25,6 +26,7 @@
 #'   \item \code{fit0}: model parameter estimator under independence assumption.
 #' }
 #'
+#' @seealso \code{\link{as.2pdata}}
 #' @examples
 #'   erosion_2p <- as.2pdata(f_pos = RUSLE2~logR+logK+logS,
 #'                           f_zero = ~logR+logS+crop2+crop3,
@@ -91,7 +93,13 @@ mleLBH <- function(data_2p, link = "logit"){
   result$refvar1 <- thetahat[p1+1]^2
   result$refvar0 <- thetahat[p1+p2+3]^2
   result$refcor <- atan(thetahat[p1+p2+4])*2/pi
-  result$loglik <- -1*res.theta$value
+  ## loglik term of lambda
+  type <- attributes(data_2p)$transform
+  lambda <- attributes(data_2p)$lambda
+  ys <- sae::bxcx(lys, lambda, InverseQ = TRUE, type = type)
+  lllambda <- (lambda-1)*sum(log(ys)) + ifelse(type=="power", sum(nti)*log(lambda), 0)
+  ## full log-likelihood
+  result$loglik <- -1*res.theta$value + lllambda
   infmat <- solve(res.theta$hessian)
   result$vcov <- list(p1 = infmat[1:p1, 1:p1],
                       p0 = infmat[(p1+3):(p1+p2+2), (p1+3):(p1+p2+2)])
