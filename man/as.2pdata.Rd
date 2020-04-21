@@ -4,7 +4,14 @@
 \alias{as.2pdata}
 \title{Converts a data frame to a list made for fitting LBH model}
 \usage{
-as.2pdata(f_pos, f_zero = f_pos, f_area, data)
+as.2pdata(
+  f_pos,
+  f_zero = f_pos,
+  f_area,
+  data,
+  transform = "BoxCox",
+  lambda = 0
+)
 }
 \arguments{
 \item{f_pos}{an object of class \code{\link[stats]{formula}}:
@@ -19,11 +26,17 @@ a symbolic description of the area code to be fitted to both the positive part a
 
 \item{data}{sample data containing the variables named in \code{f_pos}, \code{f_zero} and \code{f_area}.
 Any sampling units containing missing entries in the model data frame are removed.}
+
+\item{transform}{type of transformation for the positive responses to be chosen between the
+"BoxCox" and "power" families. Default value is "Boxcox".}
+
+\item{lambda}{value for the parameter of the family of transformations specified in \code{transform}.
+Default value is 0, which gives the log transformation for the two possible families.}
 }
 \value{
 An object of the class "2pdata" which is a list with the following components:
 \itemize{
-  \item \code{lys}: response vector in log scale for the positive part
+  \item \code{lys}: transformed response vector for the positive part
   \item \code{Xs1}: model matrix for the positive part
   \item \code{deltas}: binary response vector for the binary part
   \item \code{Xs0}: model matrix for the binary part
@@ -36,10 +49,23 @@ The default method transforms the data into a format that fits the framework of 
 \details{
 The response variable in the formula \code{f_zero} is ignored.
   \code{I(y>0)} will be used for the binary part where \code{y} is the
-  response variable in the formula \code{f_pos}.
+  response variable in the formula \code{f_pos}. \cr
+  Although this function
+  allows a general transformation family for the positive
+  part, the Empirical Bayes predictor of area means developed in the paper of
+  Lyu, Berg and Hofmann (\code{\link{ebLBH}}) assumes a log transformation
+  is used. A general transformation family is
+  provided in this function so as to facilitate a profile likelihood analysis
+  together with the function \code{\link{mleLBH}} to check the assumption of a log transformation
+  for the positive part, i.e., whether lambda is significantly different from 0.
+  See \href{https://github.com/XiaodanLyu/zero-sae-bj-2020/blob/master/case_study/case_study.pdf}{here}
+  for an example of profiling lambda with respect to the BoxCox transformation family.
 }
 \examples{
   erosion_2p <- as.2pdata(f_pos = RUSLE2~logR+logK+logS,
                           f_zero = ~logR+logS+crop2+crop3,
                           f_area = ~cty, data = erosion)
+}
+\seealso{
+\code{\link[sae]{bxcx}}
 }
