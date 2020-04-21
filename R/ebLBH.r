@@ -33,6 +33,7 @@
 #'  \item \code{mse}: the One-step MSE estimator
 #' }
 #'
+#' @seealso \code{\link{as.2pdata}}, \code{\link{mleLBH}}
 #' @examples
 #'   erosion_2p <- as.2pdata(f_pos = RUSLE2~logR+logK+logS,
 #'                           f_zero = ~logR+logS+crop2+crop3,
@@ -55,6 +56,11 @@ ebLBH <- function(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE){
   Xs1_oos <- model.matrix(fs$f_pos[-2], data = Xaux)
   Xs0_oos <- model.matrix(fs$f_zero, data = Xaux)
   link <- attributes(fit)$link
+
+  ## only suitable for log-transformed positive responses
+  if(attributes(data_2p)$lambda!=0){
+    stop("This method only applies to log-transformed positive responses.")
+  }
 
   attach(data_2p, warn.conflicts = FALSE)
   attach(fit, warn.conflicts = FALSE)
@@ -120,7 +126,7 @@ ebLBH <- function(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE){
   cij <- exp(Xs1_oos%*%beta + Gns%*%(mu_u+sig2_u/2) + sig2le/2)
   nbaris <- tapply(q, area_oos, sum)
   ybar.r <- drop(t(Gns) %*% (eb.peta*cij*q))/nbaris
-  ybar.s <- drop(t(Gs[deltas==1,]) %*% expo(lys))/nis
+  ybar.s <- drop(t(Gs[deltas==1,]) %*% exp(lys))/nis
   eb <- drop(fis*ybar.s+nbaris*ybar.r)/(fis+nbaris)
 
   ## MSE estimator ####

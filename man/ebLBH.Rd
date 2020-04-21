@@ -53,3 +53,6 @@ When \code{Xaux} contains only the covariates of the out-of-sample units (\code{
   fit <- mleLBH(erosion_2p)
   predictions <- ebLBH(Xaux, f_q = ~cnt, erosion_2p, fit, fullpop = TRUE)
 }
+\seealso{
+\code{\link{as.2pdata}}, \code{\link{mleLBH}}
+}
