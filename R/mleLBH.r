@@ -23,6 +23,8 @@
 #'     from the model fit in the positive part (\code{p1}, cases with nonpositive response are NA.).
 #'   \item \code{vcov}: list of the estimated variance-covariance matrices of the linear coefficients
 #'     in the positive part (\code{p1}) and in the binary part (\code{p0}).
+#'   \item \code{cirefcor}: function that has one argument -- confidence level (\code{alpha}) and
+#'     returns \eqn{1-\alpha} confidence interval of the correlation coefficient.
 #'   \item \code{fit0}: model parameter estimator under independence assumption.
 #' }
 #'
@@ -38,7 +40,7 @@ mleLBH <- function(data_2p, link = "logit"){
 
   result <- list(fixed = NA, random = NA, errorvar = NA, refvar1 = NA,
                  refvar0 = NA, refcor = NA, loglik = NA, residuals = NA,
-                 vcov = NA, fit0 = NA)
+                 vcov = NA, cirefcor = NA, fit0 = NA)
   attr(result, "link") <- link
 
   ## argument parsing and checking ####
@@ -100,9 +102,13 @@ mleLBH <- function(data_2p, link = "logit"){
   lllambda <- (lambda-1)*sum(log(ys)) + ifelse(type=="power", sum(nti)*log(lambda), 0)
   ## full log-likelihood
   result$loglik <- -1*res.theta$value + lllambda
-  infmat <- solve(res.theta$hessian)
-  result$vcov <- list(p1 = infmat[1:p1, 1:p1],
-                      p0 = infmat[(p1+3):(p1+p2+2), (p1+3):(p1+p2+2)])
+  vcovmat <- solve(res.theta$hessian)
+  result$vcov <- list(p1 = vcovmat[1:p1, 1:p1],
+                      p0 = vcovmat[(p1+3):(p1+p2+2), (p1+3):(p1+p2+2)])
+  result$cirefcor <- function(alpha = 0.05){
+    ci_t <- thetahat[p1+p2+4]+c(-1,1)*qnorm(1-alpha/2)*sqrt(vcovmat[p1+p2+4, p1+p2+4])
+    atan(ci_t)*2/pi
+  }
 
   ## EB predictor of random effects
   result$random <- ranefLBH(thetahat, lys, Xs1, deltas, Xs0, area, link)
