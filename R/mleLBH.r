@@ -106,8 +106,10 @@ mleLBH <- function(data_2p, link = "logit"){
   result$vcov <- list(p1 = vcovmat[1:p1, 1:p1],
                       p0 = vcovmat[(p1+3):(p1+p2+2), (p1+3):(p1+p2+2)])
   result$cirefcor <- function(alpha = 0.05){
-    ci_t <- thetahat[p1+p2+4]+c(-1,1)*qnorm(1-alpha/2)*sqrt(vcovmat[p1+p2+4, p1+p2+4])
-    atan(ci_t)*2/pi
+    t <- thetahat[p1+p2+4]
+    se.rho <- (2/pi)/(1+t^2)*sqrt(vcovmat[p1+p2+4, p1+p2+4])
+    ci.rho <- atan(t)*2/pi+c(-1,1)*qnorm(1-alpha/2)*se.rho
+    c(max(-1, ci.rho[1]), min(1, ci.rho[2]))
   }
 
   ## EB predictor of random effects
@@ -318,7 +320,7 @@ loglik.neg.grad <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
 
   ## partial rho
   pgpr <- -2*rho/(1-rho^2)*gamma*(1-gamma)
-  pvpr <- -2*rho*gamma*sig2lb
+  pvpr <- -2*rho*gamma*sig2lb/(1-(1-gamma)*rho^2)
   pmpr <- b_m/rho
   prpt <- (2/pi)/(1+t^2)
   pr <- sum(1/2*(-pgpr/(1-gamma)+rbar^2*pgpr/(sig2le/nti)+
