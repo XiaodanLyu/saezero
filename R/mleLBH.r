@@ -298,7 +298,7 @@ loglik.neg.grad <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   pvpb <- 2*b_v/sqrt(sig2lb)
   pmpu <- (sig2le/nti-sig2lu)/(sig2le/nti+sig2lu)*b_m/sqrt(sig2lu)
   pmpu[nti==0] <- 0
-  pmpe <- -2*b_m*(sig2le/nti)/(sig2le/nti+sig2lu)
+  pmpe <- -2*b_m*(sqrt(sig2le)/nti)/(sig2le/nti+sig2lu)
   pmpe[nti==0] <- 0
   pmpb <- b_m/sqrt(sig2lb)
 
@@ -321,9 +321,10 @@ loglik.neg.grad <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   pvpr <- -2*rho*gamma*sig2lb
   pmpr <- b_m/rho
   prpt <- (2/pi)/(1+t^2)
-  pt <- sum(1/2*(-pgpr*prpt/(1-gamma)+rbar^2*pgpr*prpt/(sig2le/nti)+
-                   2*pmpr*prpt*b_m/b_v-(b_m/b_v)^2*pvpr*prpt))+
-    colSums(numint(function(b) (b-b_m)/b_v*pmpr*prpt+(b-b_m)^2/(2*b_v^2)*pvpr*prpt)/den)
+  pr <- sum(1/2*(-pgpr/(1-gamma)+rbar^2*pgpr/(sig2le/nti)+
+                   2*pmpr*b_m/b_v-(b_m/b_v)^2*pvpr))+
+    colSums(numint(function(b) (b-b_m)/b_v*pmpr+(b-b_m)^2/(2*b_v^2)*pvpr)/den)
+  pt <- pr*prpt
 
   return(-c(pbeta, psigu, psige, palpha, psigb, pt))
 }
