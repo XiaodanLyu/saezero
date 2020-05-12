@@ -28,10 +28,6 @@ The function returns a list with the following objects:
     in the positive part as specified in \code{\link{as.2pdata}}.
   \item \code{residuals}: the marginal (\code{mar}) and conditional (\code{con}) residuals
     from the model fit in the positive part (\code{p1}, cases with nonpositive response are NA.).
-  \item \code{vcov}: list of the estimated variance-covariance matrices of the linear coefficients
-    in the positive part (\code{p1}) and in the binary part (\code{p0}).
-  \item \code{cirefcor}: function that has one argument -- confidence level (\code{alpha}) and
-    returns \eqn{1-\alpha} confidence interval of the correlation coefficient.
   \item \code{fit0}: model parameter estimator under independence assumption.
 }
 }

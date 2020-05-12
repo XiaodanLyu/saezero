@@ -5,7 +5,8 @@ Version: 0.1.0
 Date: 2020-03-22
 Author: Xiaodan Lyu <annielyu8@gmail.com>
 Maintainer: Xiaodan Lyu <annielyu8@gmail.com>
-Description: Functions for small area estimation under a zero inflated lognormal model with correlated random area effects. The functions in this package are designed and named after the package sae (Molina and Marhuenda, 2015). 
+URL: https://github.com/XiaodanLyu/saezero
+Description: Functions for small area estimation under a zero inflated lognormal model with correlated random area effects. The functions in this package are designed and named after the package sae (Molina and Marhuenda, 2015). Special thanks to Dr. Emily Berg <emilyb@iastate.edu> whose R code serves as a great guide to develop part of the functions in this package.
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

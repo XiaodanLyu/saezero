@@ -21,10 +21,6 @@
 #'     in the positive part as specified in \code{\link{as.2pdata}}.
 #'   \item \code{residuals}: the marginal (\code{mar}) and conditional (\code{con}) residuals
 #'     from the model fit in the positive part (\code{p1}, cases with nonpositive response are NA.).
-#'   \item \code{vcov}: list of the estimated variance-covariance matrices of the linear coefficients
-#'     in the positive part (\code{p1}) and in the binary part (\code{p0}).
-#'   \item \code{cirefcor}: function that has one argument -- confidence level (\code{alpha}) and
-#'     returns \eqn{1-\alpha} confidence interval of the correlation coefficient.
 #'   \item \code{fit0}: model parameter estimator under independence assumption.
 #' }
 #'
@@ -40,7 +36,7 @@ mleLBH <- function(data_2p, link = "logit"){
 
   result <- list(fixed = NA, random = NA, errorvar = NA, refvar1 = NA,
                  refvar0 = NA, refcor = NA, loglik = NA, residuals = NA,
-                 vcov = NA, cirefcor = NA, fit0 = NA)
+                 fit0 = NA)
   attr(result, "link") <- link
 
   ## argument parsing and checking ####
@@ -73,7 +69,7 @@ mleLBH <- function(data_2p, link = "logit"){
   if(is.na(rho_ind)) rho_ind <- 0
   # 2. maximize log-likelihood over parameter space
   theta0 <- c(b_ind, sqrt(sig2u_ind), sige_ind,
-              a_ind, sqrt(max(0.0098, sig2b_ind)), tan(pi/2*rho_ind))
+              a_ind, sqrt(max(1e-5, sig2b_ind)), tan(pi/2*rho_ind))
 
   result$fit0 <- list(fixed = list(p1 = b_ind, p0 = a_ind),
                       errorvar = sige_ind^2, refvar1 = sig2u_ind,
@@ -102,15 +98,6 @@ mleLBH <- function(data_2p, link = "logit"){
   lllambda <- (lambda-1)*sum(log(ys)) + ifelse(type=="power", sum(nti)*log(lambda), 0)
   ## full log-likelihood
   result$loglik <- -1*res.theta$value + lllambda
-  # vcovmat <- solve(res.theta$hessian)
-  # result$vcov <- list(p1 = vcovmat[1:p1, 1:p1],
-  #                     p0 = vcovmat[(p1+3):(p1+p2+2), (p1+3):(p1+p2+2)])
-  # result$cirefcor <- function(alpha = 0.05){
-  #   t <- thetahat[p1+p2+4]
-  #   se.rho <- (2/pi)/(1+t^2)*sqrt(vcovmat[p1+p2+4, p1+p2+4])
-  #   ci.rho <- atan(t)*2/pi+c(-1,1)*qnorm(1-alpha/2)*se.rho
-  #   c(max(-1, ci.rho[1]), min(1, ci.rho[2]))
-  # }
 
   ## EB predictor of random effects
   result$random <- ranefLBH(thetahat, lys, Xs1, deltas, Xs0, area, link)
@@ -202,7 +189,8 @@ loglik.neg <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   l2 <- gamma*rbar^2/(sig2le/nti)
   b_m <- rho*sqrt(sig2lu*sig2lb)*rbar/(sig2lu+sig2le/nti)
   b_v <- (1-rho^2)/(1-(1-gamma)*rho^2)*sig2lb
-  l3 <- b_m^2/b_v
+  # l3 <- b_m^2/b_v
+  l3 <- (rho*sqrt(sig2lu)*rbar/(sig2lu+sig2le/nti))^2 / ((1-rho^2)/(1-(1-gamma)*rho^2))
   l4 <- t(Gs)%*%(rt^2)/sig2le
 
   ## Gauss-Hermite method
