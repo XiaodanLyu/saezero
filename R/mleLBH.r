@@ -5,7 +5,8 @@
 #'
 #' @param data_2p a two-part data object returned by \code{\link{as.2pdata}}.
 #' @param link a specification for the link function used to model the binary part.
-#'   The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \code{log} and \code{cloglog}.
+#'   The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \code{log}, \code{cloglog}
+#'   and an object of the class \code{link-glm}, see the documentation of \code{\link[stats]{make.link}}.
 #'   Default value is "logit".
 #' @return The function returns a list with the following objects:
 #' \itemize{
@@ -40,8 +41,11 @@ mleLBH <- function(data_2p, link = "logit"){
   attr(result, "link") <- link
 
   ## argument parsing and checking ####
-  if (!(link %in% c("logit", "probit", "cauchit", "log", "cloglog")))
-    stop("Argument link must be \"logit\", \"probit\", \"cauchit\", \"log\" or \"cloglog\".")
+  if(!class(link)=="link-glm"){
+    link <- as.character(link)
+    if(!(link %in% c("logit", "probit", "cauchit", "log", "cloglog")))
+      stop("Argument link must be \"logit\", \"probit\", \"cauchit\", \"log\", \"cloglog\" or an object of the class \"link-glm\".")
+  }
 
   attach(data_2p, warn.conflicts = FALSE)
 
@@ -124,6 +128,8 @@ ranefLBH <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   sig2lb <- theta[p1+p2+3]^2
   rho <- atan(theta[p1+p2+4])*2/pi
 
+  if(class(link)!="link-glm") link <- make.link(link)
+
   nis <- tapply(deltas, area, length)
   D <- length(nis)
   Gs <- Gmat(nis)
@@ -147,7 +153,7 @@ ranefLBH <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   numint <- function(g){
     arr <- lapply(1:20, function(r){
       mu_p <- Xs0%*%alpha + Gs%*%bmat[,r]
-      p <- make.link(link)$linkinv(mu_p)
+      p <- link$linkinv(mu_p)
       pq <- as.vector(ifelse(deltas, p, 1-p))
       thres <- apply(Gs*pq, 2, function(x) prod(x[x>0]))
       return(as.matrix(thres*g(bmat[,r])*wmat[,r]))
@@ -174,6 +180,8 @@ loglik.neg <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   alpha <- theta[(p1+3):(p1+p2+2)]
   sig2lb <- theta[p1+p2+3]^2
   rho <- atan(theta[p1+p2+4])*2/pi
+
+  if(class(link)!="link-glm") link <- make.link(link)
 
   nis <- tapply(deltas, area, length)
   D <- length(nis)
@@ -203,7 +211,7 @@ loglik.neg <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   numint <- function(g){
     arr <- lapply(1:20, function(r){
       mu_p <- Xs0%*%alpha + Gs%*%bmat[,r]
-      p <- make.link(link)$linkinv(mu_p)
+      p <- link$linkinv(mu_p)
       pq <- as.vector(ifelse(deltas, p, 1-p))
       thres <- apply(Gs*pq, 2, function(x) prod(x[x>0]))
       return(as.matrix(thres*g(bmat[,r])*wmat[,r]))
@@ -228,6 +236,8 @@ loglik.neg.grad <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   sig2lb <- theta[p1+p2+3]^2
   t <- theta[p1+p2+4]
   rho <- atan(t)*2/pi
+
+  if(class(link)!="link-glm") link <- make.link(link)
 
   nis <- tapply(deltas, area, length)
   D <- length(nis)
@@ -256,7 +266,7 @@ loglik.neg.grad <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   numint <- function(g){
     arr <- lapply(1:20, function(r){
       mu_p <- Xs0%*%alpha + Gs%*%bmat[,r]
-      p <- make.link(link)$linkinv(mu_p)
+      p <- link$linkinv(mu_p)
       pq <- as.vector(ifelse(deltas, p, 1-p))
       thres <- apply(Gs*pq, 2, function(x) prod(x[x>0]))
       return(as.matrix(thres*g(bmat[,r])*wmat[,r]))
@@ -275,7 +285,7 @@ loglik.neg.grad <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   ## partial alpha
   pppa <- function(b){
     mu_p <- Xs0%*%alpha + Gs %*% b
-    p <- make.link(link)$linkinv(mu_p)
+    p <- link$linkinv(mu_p)
     qp <- as.vector(ifelse(deltas, 1-p, -p))
     t(Gs)%*%(Xs0*qp)
   }

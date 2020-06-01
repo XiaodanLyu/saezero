@@ -10,7 +10,8 @@ mleLBH(data_2p, link = "logit")
 \item{data_2p}{a two-part data object returned by \code{\link{as.2pdata}}.}
 
 \item{link}{a specification for the link function used to model the binary part.
-The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \code{log} and \code{cloglog}.
+The accepted link functions are \code{logit}, \code{probit}, \code{cauchit}, \code{log}, \code{cloglog}
+and an object of the class \code{link-glm}, see the documentation of \code{\link[stats]{make.link}}.
 Default value is "logit".}
 }
 \value{

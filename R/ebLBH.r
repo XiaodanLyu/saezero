@@ -56,6 +56,7 @@ ebLBH <- function(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE){
   Xs1_oos <- model.matrix(fs$f_pos[-2], data = Xaux)
   Xs0_oos <- model.matrix(fs$f_zero, data = Xaux)
   link <- attributes(fit)$link
+  if(class(link)!="link-glm") link <- make.link(link)
 
   ## only suitable for log-transformed positive responses
   if(attributes(data_2p)$lambda!=0){
@@ -106,7 +107,7 @@ ebLBH <- function(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE){
   wmat <- matrix(ghwts$weights, nrow = D, ncol = 20, byrow = T)
   thres.gen <- function(b){
     mu_p <- Xs0%*%alpha + Gs%*%b
-    p <- make.link(link)$linkinv(mu_p)
+    p <- link$linkinv(mu_p)
     pq <- as.vector(ifelse(deltas, p, 1-p))
     thres <- apply(Gs*pq, 2, function(x) prod(x[x>0]))
     thres
@@ -117,7 +118,7 @@ ebLBH <- function(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE){
   num.emp <- function(b){
     thres <- thres.gen(b)
     mu_p <- Xs0_oos%*%alpha + Gns%*%b
-    pb <- make.link(link)$linkinv(mu_p)
+    pb <- link$linkinv(mu_p)
     num <- Gns%*%(thres*(eta^b))*pb
     drop(num)
   }
@@ -132,7 +133,7 @@ ebLBH <- function(Xaux, f_q = ~1, data_2p, fit, fullpop = FALSE){
   ## MSE estimator ####
   num.y2eb <- function(b){
     mu_p <- Xs0_oos%*%alpha + Gns%*%b
-    pb <- make.link(link)$linkinv(mu_p)
+    pb <- link$linkinv(mu_p)
     V <- pb*cij*q
     Wij <- function(i){
       id <- which(area_oos==unique(area_oos)[i])
