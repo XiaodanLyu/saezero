@@ -152,8 +152,8 @@ ranefLBH <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   wmat <- matrix(ghwts$weights, nrow = D, ncol = 20, byrow = T)
   numint <- function(g){
     arr <- lapply(1:20, function(r){
-      mu_p <- Xs0%*%alpha + Gs%*%bmat[,r]
-      p <- link$linkinv(mu_p)
+      eta <- Xs0%*%alpha + Gs%*%bmat[,r]
+      p <- link$linkinv(eta)
       pq <- as.vector(ifelse(deltas, p, 1-p))
       thres <- apply(Gs*pq, 2, function(x) prod(x[x>0]))
       return(as.matrix(thres*g(bmat[,r])*wmat[,r]))
@@ -210,8 +210,8 @@ loglik.neg <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   wmat <- matrix(ghwts$weights, nrow = D, ncol = 20, byrow = T)
   numint <- function(g){
     arr <- lapply(1:20, function(r){
-      mu_p <- Xs0%*%alpha + Gs%*%bmat[,r]
-      p <- link$linkinv(mu_p)
+      eta <- Xs0%*%alpha + Gs%*%bmat[,r]
+      p <- link$linkinv(eta)
       pq <- as.vector(ifelse(deltas, p, 1-p))
       thres <- apply(Gs*pq, 2, function(x) prod(x[x>0]))
       return(as.matrix(thres*g(bmat[,r])*wmat[,r]))
@@ -265,8 +265,8 @@ loglik.neg.grad <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
   wmat <- matrix(ghwts$weights, nrow = D, ncol = 20, byrow = T)
   numint <- function(g){
     arr <- lapply(1:20, function(r){
-      mu_p <- Xs0%*%alpha + Gs%*%bmat[,r]
-      p <- link$linkinv(mu_p)
+      eta <- Xs0%*%alpha + Gs%*%bmat[,r]
+      p <- link$linkinv(eta)
       pq <- as.vector(ifelse(deltas, p, 1-p))
       thres <- apply(Gs*pq, 2, function(x) prod(x[x>0]))
       return(as.matrix(thres*g(bmat[,r])*wmat[,r]))
@@ -284,10 +284,11 @@ loglik.neg.grad <- function(theta, lys, Xs1, deltas, Xs0, area, link = "logit"){
 
   ## partial alpha
   pppa <- function(b){
-    mu_p <- Xs0%*%alpha + Gs %*% b
-    p <- link$linkinv(mu_p)
-    qp <- as.vector(ifelse(deltas, 1-p, -p))
-    t(Gs)%*%(Xs0*qp)
+    eta <- Xs0%*%alpha + Gs %*% b
+    p <- link$linkinv(eta)
+    pa <- as.vector(link$mu.eta(eta))
+    qp <- as.vector(ifelse(deltas, 1/p, -1/(1-p)))
+    t(Gs)%*%(Xs0*pa*qp)
   }
   palpha <- colSums(numint(pppa)/drop(den))
 
